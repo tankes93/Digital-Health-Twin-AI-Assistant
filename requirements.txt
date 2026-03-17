@@ -10,5 +10,5 @@ langchain-huggingface>=0.0.1
 sentence-transformers>=2.6.1
 chromadb>=0.4.24
 pydantic>=2.6.4
-faker>=24.4.0
 requests>=2.31.0
+
