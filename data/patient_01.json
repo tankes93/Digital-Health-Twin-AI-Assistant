@@ -1,0 +1,38 @@
+{
+  "patient_id": "patient_01",
+  "name": "John Martinez",
+  "age": 32,
+  "gender": "Male",
+  "heart_rate": 72,
+  "sleep_hours": 8.2,
+  "daily_steps": 3306,
+  "blood_pressure": "138/98",
+  "stress_level": "Moderate",
+  "bmi": 24.2,
+  "medical_history": [
+    {
+      "condition": "Hypertension",
+      "diagnosed_date": "2022-04-06",
+      "status": "Active"
+    },
+    {
+      "condition": "Type 2 Diabetes",
+      "diagnosed_date": "2022-06-15",
+      "status": "Managed"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Daily"
+    },
+    {
+      "name": "Metformin",
+      "dosage": "500mg",
+      "frequency": "Twice Daily"
+    }
+  ],
+  "doctor_notes": "Follow-up required in 3 months for cholesterol check.",
+  "last_updated": "2026-03-17T09:07:36.366646"
+}

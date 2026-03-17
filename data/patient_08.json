@@ -1,0 +1,28 @@
+{
+  "patient_id": "patient_08",
+  "name": "Patricia Martinez",
+  "age": 56,
+  "gender": "Female",
+  "heart_rate": 64,
+  "sleep_hours": 7.1,
+  "daily_steps": 2831,
+  "blood_pressure": "153/88",
+  "stress_level": "High",
+  "bmi": 19.9,
+  "medical_history": [
+    {
+      "condition": "Hypertension",
+      "diagnosed_date": "2025-04-09",
+      "status": "Active"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Daily"
+    }
+  ],
+  "doctor_notes": "Follow-up required in 3 months for cholesterol check. Patient reports high work-related stress affecting sleep.",
+  "last_updated": "2026-03-17T09:07:36.366270"
+}

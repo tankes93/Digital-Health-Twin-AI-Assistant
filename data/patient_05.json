@@ -1,0 +1,16 @@
+{
+  "patient_id": "patient_05",
+  "name": "Thomas Smith",
+  "age": 31,
+  "gender": "Male",
+  "heart_rate": 68,
+  "sleep_hours": 4.6,
+  "daily_steps": 5404,
+  "blood_pressure": "110/80",
+  "stress_level": "Low",
+  "bmi": 23.0,
+  "medical_history": [],
+  "medications": [],
+  "doctor_notes": "Blood pressure is slightly elevated compared to last visit. Patient complains of insomnia and fatigue.",
+  "last_updated": "2026-03-17T09:07:36.367400"
+}

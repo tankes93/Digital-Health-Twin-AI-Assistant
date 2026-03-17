@@ -1,0 +1,28 @@
+{
+  "patient_id": "patient_02",
+  "name": "Karen Brown",
+  "age": 62,
+  "gender": "Female",
+  "heart_rate": 66,
+  "sleep_hours": 4.9,
+  "daily_steps": 3731,
+  "blood_pressure": "142/77",
+  "stress_level": "Moderate",
+  "bmi": 26.8,
+  "medical_history": [
+    {
+      "condition": "Hypertension",
+      "diagnosed_date": "2025-04-29",
+      "status": "Active"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Daily"
+    }
+  ],
+  "doctor_notes": "Patient reports occasional headaches in the morning. Monitoring BP. Patient complains of insomnia and fatigue.",
+  "last_updated": "2026-03-17T09:07:36.367149"
+}

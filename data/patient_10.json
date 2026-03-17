@@ -1,0 +1,16 @@
+{
+  "patient_id": "patient_10",
+  "name": "Michael Rodriguez",
+  "age": 81,
+  "gender": "Male",
+  "heart_rate": 88,
+  "sleep_hours": 4.5,
+  "daily_steps": 8693,
+  "blood_pressure": "117/81",
+  "stress_level": "High",
+  "bmi": 23.2,
+  "medical_history": [],
+  "medications": [],
+  "doctor_notes": "Patient reports occasional headaches in the morning. Monitoring BP. Patient reports high work-related stress affecting sleep. Patient complains of insomnia and fatigue.",
+  "last_updated": "2026-03-17T09:07:36.366757"
+}

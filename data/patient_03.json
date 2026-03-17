@@ -1,0 +1,28 @@
+{
+  "patient_id": "patient_03",
+  "name": "Barbara Martinez",
+  "age": 77,
+  "gender": "Female",
+  "heart_rate": 77,
+  "sleep_hours": 7.8,
+  "daily_steps": 6266,
+  "blood_pressure": "141/94",
+  "stress_level": "High",
+  "bmi": 28.9,
+  "medical_history": [
+    {
+      "condition": "Hypertension",
+      "diagnosed_date": "2025-03-14",
+      "status": "Active"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Daily"
+    }
+  ],
+  "doctor_notes": "Patient is generally healthy but needs to improve sleep schedule. Recommend cutting caffeine. Patient reports high work-related stress affecting sleep.",
+  "last_updated": "2026-03-17T09:07:36.367053"
+}

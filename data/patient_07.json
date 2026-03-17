@@ -1,0 +1,33 @@
+{
+  "patient_id": "patient_07",
+  "name": "Michael Johnson",
+  "age": 47,
+  "gender": "Male",
+  "heart_rate": 90,
+  "sleep_hours": 4.9,
+  "daily_steps": 5038,
+  "blood_pressure": "141/80",
+  "stress_level": "High",
+  "bmi": 32.8,
+  "medical_history": [
+    {
+      "condition": "Hypertension",
+      "diagnosed_date": "2022-03-26",
+      "status": "Active"
+    },
+    {
+      "condition": "Obesity",
+      "diagnosed_date": "2024-04-30",
+      "status": "Active"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Daily"
+    }
+  ],
+  "doctor_notes": "Patient is active and exercising regularly. Patient reports high work-related stress affecting sleep. Patient complains of insomnia and fatigue.",
+  "last_updated": "2026-03-17T09:07:36.367236"
+}

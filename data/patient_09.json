@@ -1,0 +1,16 @@
+{
+  "patient_id": "patient_09",
+  "name": "Jennifer Rodriguez",
+  "age": 64,
+  "gender": "Female",
+  "heart_rate": 67,
+  "sleep_hours": 6.6,
+  "daily_steps": 8517,
+  "blood_pressure": "113/71",
+  "stress_level": "Low",
+  "bmi": 29.8,
+  "medical_history": [],
+  "medications": [],
+  "doctor_notes": "Patient reports occasional headaches in the morning. Monitoring BP.",
+  "last_updated": "2026-03-17T09:07:36.367318"
+}

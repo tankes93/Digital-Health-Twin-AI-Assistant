@@ -1,0 +1,33 @@
+{
+  "patient_id": "patient_04",
+  "name": "Jessica Smith",
+  "age": 66,
+  "gender": "Female",
+  "heart_rate": 74,
+  "sleep_hours": 8.9,
+  "daily_steps": 10314,
+  "blood_pressure": "141/73",
+  "stress_level": "Moderate",
+  "bmi": 31.3,
+  "medical_history": [
+    {
+      "condition": "Hypertension",
+      "diagnosed_date": "2025-09-06",
+      "status": "Active"
+    },
+    {
+      "condition": "Obesity",
+      "diagnosed_date": "2025-11-13",
+      "status": "Active"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Daily"
+    }
+  ],
+  "doctor_notes": "Patient is active and exercising regularly.",
+  "last_updated": "2026-03-17T09:07:36.366920"
+}
