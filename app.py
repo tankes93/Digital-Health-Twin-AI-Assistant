@@ -1,10 +1,20 @@
 import streamlit as st
-import requests
 import json
 import os
+import time
+
+# --- STANDALONE MODE IMPORT ---
+# This allows the app to run on Streamlit Cloud without a separate URL
+try:
+    from rag.vector_store import PatientVectorStore
+    from rag.chain import RAGChain
+    from utils.analytics import HealthAnalytics
+    from langchain_core.documents import Document
+    STANDALONE_MODE = True
+except ImportError:
+    STANDALONE_MODE = False
 
 # Configuration
-API_URL = "http://localhost:8000/ask"
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 st.set_page_config(
@@ -12,6 +22,72 @@ st.set_page_config(
     page_icon="🏥",
     layout="wide"
 )
+
+# --- SYSTEM INITIALIZATION (CACHE) ---
+@st.cache_resource
+def initialize_system():
+    """
+    Initializes the RAG components and ingests data if needed.
+    This runs once on startup.
+    """
+    if not STANDALONE_MODE:
+        return None, None
+        
+    # 1. Initialize Vector Store
+    vs = PatientVectorStore()
+    
+    # Check if we need to ingest data (if vector store is empty or needs refresh)
+    # Simple check: if collection count is 0, ingest.
+    try:
+        if vs.vector_db._collection.count() == 0:
+            st.toast("Ingesting patient data...", icon="⚙️")
+            vs.ingest_patient_data(DATA_DIR)
+    except:
+        # Fallback if specific collection check fails
+        pass
+
+    # 2. Initialize RAG Chain
+    # Ensure API Key is available
+    if not os.environ.get("GROQ_API_KEY"):
+        # Check Streamlit secrets
+        if "GROQ_API_KEY" in st.secrets:
+            os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+            
+    chain = RAGChain()
+    return vs, chain
+
+# Helper: General Context for Standalone Mode
+def get_general_context() -> Document:
+    if not os.path.exists(DATA_DIR):
+        return Document(page_content="No patient data directory found.")
+    
+    files = [f for f in os.listdir(DATA_DIR) if f.endswith('.json')]
+    total_patients = len(files)
+    patient_summaries = []
+    
+    for filename in sorted(files):
+        try:
+            with open(os.path.join(DATA_DIR, filename), 'r') as f:
+                data = json.load(f)
+                p_id = data.get("patient_id", filename.replace(".json", ""))
+                name = data.get("name", "Unknown")
+                age = data.get("age", "N/A")
+                conditions = [c.get("condition") for c in data.get("medical_history", [])]
+                patient_summaries.append(f"- {p_id}: {name} ({age}y) - Conditions: {', '.join(conditions)}")
+        except Exception:
+            continue
+            
+    summary_text = (
+        f"SYSTEM OVERVIEW:\n"
+        f"Total Patients in Database: {total_patients}\n"
+        f"List of All Patients:\n" + "\n".join(patient_summaries)
+    )
+    return Document(page_content=summary_text, metadata={"type": "system_overview"})
+
+
+# Initialize
+if STANDALONE_MODE:
+    vector_store, rag_chain = initialize_system()
 
 # Custom CSS
 st.markdown("""
@@ -68,15 +144,19 @@ with st.sidebar:
         selected_patient = None
         
     st.markdown("---")
-    st.markdown("### System Status")
-    try:
-        if requests.get("http://localhost:8000/").status_code == 200:
-            st.success("API Connected")
-        else:
-            st.error("API Error")
-    except:
-        st.error("API Offline")
-        st.info("Run: `uvicorn main:app --reload`")
+    
+    # Only show system status in API mode
+    if not STANDALONE_MODE:
+        st.markdown("### System Status")
+        try:
+            import requests # Lazy import for non-standalone
+            if requests.get("http://localhost:8000/").status_code == 200:
+                st.success("API Connected")
+            else:
+                st.error("API Error")
+        except:
+            st.error("API Offline")
+            st.info("Run: `uvicorn main:app --reload`")
 
 # Main Content
 if selected_patient:
@@ -84,8 +164,9 @@ if selected_patient:
     
     if selected_patient != "General":
         # Load raw patient data for display
-        try:
-            with open(os.path.join(DATA_DIR, f"{selected_patient}.json"), 'r') as f:
+        p_path = os.path.join(DATA_DIR, f"{selected_patient}.json")
+        if os.path.exists(p_path):
+            with open(p_path, 'r') as f:
                 patient_data = json.load(f)
                 
             # Top Metrics Row
@@ -100,8 +181,8 @@ if selected_patient:
                 st.metric("Blood Pressure", patient_data.get('blood_pressure'))
             with col5:
                 st.metric("Stress Level", patient_data.get('stress_level'))
-        except Exception as e:
-            st.error(f"Error loading patient data: {e}")
+        else:
+            st.error("Patient data not found locally.")
     else:
         st.info("You are in General Mode. Ask questions about the entire patient cohort or general health queries.")
 
@@ -124,46 +205,106 @@ if selected_patient:
     # React to user input
     if prompt := st.chat_input("Ask about this patient's health..."):
         # Display user message in chat message container
-        st.chat_message("user").markdown(prompt)
+        with st.chat_message("user"):
+            st.markdown(prompt)
         # Add user message to chat history
+        if selected_patient not in st.session_state.chat_sessions:
+            st.session_state.chat_sessions[selected_patient] = []
         st.session_state.chat_sessions[selected_patient].append({"role": "user", "content": prompt})
 
-        # Call API
+        # --- LOGIC SELECTION: STANDALONE VS API ---
+        
+        response_data = {}
+        error_message = None
+
         with st.spinner("Analyzing Digital Twin..."):
-            try:
-                payload = {
+            if STANDALONE_MODE:
+                # RUN LOGIC DIRECTLY (For Streamlit Cloud Deployment)
+                try:
+                    # 1. Retrieve Context
+                    k_val = 6 if selected_patient == "General" else 4
+                    retrieved_docs = vector_store.retrieve_context(selected_patient, prompt, k=k_val)
+                    
+                    if selected_patient == "General":
+                         # Inject global context
+                         global_doc = get_general_context()
+                         retrieved_docs.insert(0, global_doc)
+
+                    # 2. Generate LLM Response
+                    rag_response = rag_chain.generate_response(retrieved_docs, prompt)
+                    raw_output = rag_response["answer"]
+                    
+                    # 3. Parse Output
+                    health_insight = raw_output
+                    reasoning_text = "Derived from patient context."
+                    if "Reasoning:" in raw_output:
+                        parts = raw_output.split("Reasoning:")
+                        health_insight = parts[0].replace("Health Insight:", "").strip()
+                        reasoning_text = parts[1].strip()
+                        
+                    # 4. Anomaly Check
+                    anomalies = []
+                    if selected_patient != "General":
+                         # Need raw patient data
+                         p_file = os.path.join(DATA_DIR, f"{selected_patient}.json")
+                         if os.path.exists(p_file):
+                             with open(p_file, 'r') as f:
+                                 p_data = json.load(f)
+                             anomalies = HealthAnalytics.check_anomalies(p_data)
+
+                    # Form response object similar to API
+                    response_data = {
+                        "health_insight": health_insight,
+                        "anomaly_flags": anomalies,
+                        "reasoning": reasoning_text,
+                        "retrieved_context": [d.page_content for d in retrieved_docs]
+                    }
+                    
+                except Exception as e:
+                    error_message = f"Internal Logic Error: {str(e)}"
+                    import traceback
+                    print(traceback.format_exc())
+                    
+            else:
+                # CALL API (Local Dev Mode)
+                import requests
+                API_URL = "http://localhost:8000/ask"
+                response = requests.post(API_URL, json={
                     "patient_id": selected_patient,
                     "user_question": prompt
-                }
-                response = requests.post(API_URL, json=payload)
+                })
                 
                 if response.status_code == 200:
-                    data = response.json()
-                    insight = data.get("health_insight")
-                    anomalies = data.get("anomaly_flags", [])
-                    
-                    # Format response
-                    full_response = insight
-                    if anomalies:
-                        full_response += "\n\n**🚨 Anomalies Detected:**\n" + "\n".join([f"- {a}" for a in anomalies])
-                        
-                    # Display assistant response in chat message container
-                    with st.chat_message("assistant"):
-                        st.markdown(full_response)
-                        with st.expander("View Reason & Context"):
-                            st.write("**Reasoning:**", data.get("reasoning"))
-                            st.write("**Source Data:**")
-                            for doc in data.get("retrieved_context", []):
-                                st.info(doc)
-                                
-                    # Add assistant response to chat history
-                    st.session_state.chat_sessions[selected_patient].append({"role": "assistant", "content": full_response})
+                    response_data = response.json()
                 else:
-                    error_msg = f"Error: {response.text}"
-                    st.error(error_msg)
-                    st.session_state.chat_sessions[selected_patient].append({"role": "assistant", "content": error_msg})
-            except Exception as e:
-                st.error(f"Connection failed: {e}")
+                    error_message = f"API Error: {response.text}"
+
+
+            # --- DISPLAY RESPONSE ---
+            if not error_message:
+                insight = response_data.get("health_insight", "No insight generated.")
+                anomalies = response_data.get("anomaly_flags", [])
+                
+                # Format response
+                full_response = insight
+                if anomalies:
+                    full_response += "\n\n**🚨 Anomalies Detected:**\n" + "\n".join([f"- {a}" for a in anomalies])
+                    
+                # Display assistant response
+                with st.chat_message("assistant"):
+                    st.markdown(full_response)
+                    with st.expander("View Reason & Context"):
+                        st.write("**Reasoning:**")
+                        st.write(response_data.get("reasoning", "N/A"))
+                        st.write("**Source Data:**")
+                        for doc in response_data.get("retrieved_context", []):
+                            st.info(doc)
+                            
+                # Add to history
+                st.session_state.chat_sessions[selected_patient].append({"role": "assistant", "content": full_response})
+            else:
+                st.error(error_message)
+                st.session_state.chat_sessions[selected_patient].append({"role": "assistant", "content": error_message})
 
 else:
     st.info("Please select a patient to view their Digital Twin.")
