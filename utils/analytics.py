@@ -35,18 +35,6 @@ class HealthAnalytics:
             
         return anomalies
 
-    @staticmethod
-    def calculate_risk_score(patient_data: Dict[str, Any]) -> str:
-        """
-        Simple heuristic risk score.
-        """
-        score = 0
-        if patient_data.get("age", 0) > 60: score += 1
-        if patient_data.get("bmi", 0) > 30: score += 2
-        if len(patient_data.get("medical_history", [])) > 0: score += len(patient_data.get("medical_history"))
-        
-        # Stress factor
-        if patient_data.get("stress_level") == "High": score += 1
         
         if score == 0: return "Low Risk"
         if score <= 2: return "Moderate Risk"

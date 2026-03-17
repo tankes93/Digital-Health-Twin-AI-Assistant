@@ -52,17 +52,6 @@ class RAGChain:
             """
         )
         
-        # Template for Risk Analysis (if needed specifically)
-        self.risk_analysis_prompt = PromptTemplate.from_template(
-            """
-            Analyze the following patient data for health risks:
-            {context}
-            
-            Identify top 3 potential health risks based on vitals and history.
-            Format as bullet points.
-            """
-        )
-
     def generate_response(self, context_docs: List[Document], query: str) -> Dict[str, Any]:
         """
         Generates a response using Groq SDK and retrieved context.
