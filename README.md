@@ -2,6 +2,9 @@
 
 A complete RAG-based AI system that analyzes patient Digital Health Twins and provides actionable health insights via a FastAPI backend and Streamlit frontend.
 
+https://github.com/user-attachments/assets/04c5a095-7e0a-4759-897d-8a2b6dda2a3e
+
+
 ## Key Features
 
 *   **RAG Pipeline**: Retrieves specific patient context (medications, history, vitals) to answer queries grounded in data.
@@ -95,6 +98,9 @@ The system uses the **Groq API** (running LLaMA 3.3-70b) to generate insights. I
 - AI reasoning to explain *why* a specific insight was generated.
 
 ## API Usage Example
+
+https://github.com/user-attachments/assets/2e3d30cd-8de8-4854-9669-863cb137e540
+
 
 **Endpoint**: `POST /ask`
 
